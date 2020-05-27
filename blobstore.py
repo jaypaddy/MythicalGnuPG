@@ -15,6 +15,7 @@ class BlobClass(object):
     sourceblob_name = os.getenv("SRCBLOB")
     dstblob_name = os.getenv("DSTBLOB")
 
+
     def download_blob(self):
         # Instantiate a new BlobServiceClient using a connection string
         blob_service_client = BlobServiceClient.from_connection_string(self.connection_string)
@@ -42,14 +43,6 @@ class BlobClass(object):
         # Upload the created file
         with open(srcBlob, "rb") as data:
             blob_client.upload_blob(data)
-
-class GnuPGClass(object):
-
-    def encrypt_blob(self,srcBlob, dstBlob):
-        # Download the SrcBlob
-
-    def decrypt_blob(self,srcBlob, dstBlob):
-
 
 
 if __name__ == '__main__':
