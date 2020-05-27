@@ -40,7 +40,7 @@ class BlobClass(object):
 
 class GnuPGClass(object):
     recipients = []
-    recipients.append(os.getenv("GNUPG_RECEIPIENTS"))
+    recipients.append(os.getenv("GNUPG_RECIPIENTS"))
     passphrase = os.getenv("GNUPG_PASSPHRASE")
     # Encrypt the given file and save it as dstFile
     def encrypt_file(self, srcFile, dstFile):
@@ -58,9 +58,9 @@ class GnuPGClass(object):
         bObj = BlobClass()
         # Download to a temp file by appending .tmp to the srcBlob name
         localOriginalFile = srcBlob + '.original.tmp'
-        localEncryptedFile = dstBlob + '.encrypted.tmp'
+        localEncryptedFile = srcBlob + '.encrypted.tmp'
         bObj.download_blob(srcBlob,localOriginalFile)
-        self.encrypt_file(localOriginalFile,localEncryptedFile )
+        self.encrypt_file(localOriginalFile,localEncryptedFile)
         bObj.upload_blob(localEncryptedFile,dstBlob)
         os.remove(localOriginalFile)
         os.remove(localEncryptedFile)
@@ -91,6 +91,7 @@ class GnuPGClass(object):
 if __name__ == '__main__':
     gnuObj = GnuPGClass()
     gnuObj.download_encrypt_and_upload_blob('blobstore.py','blobstore.encrypted.py')
+    print("Completed Download-Encrypt-Upload")
     gnuObj.download_decrypt_and_upload_blob('blobstore.encrypted.py','blobstore.decrypted.py')
 
 
