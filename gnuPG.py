@@ -5,7 +5,7 @@ Output : DecryptedFile
 import os
 import gnupg
 from azure.storage.blob import BlobServiceClient
-
+from pprint import pprint
 
 class BlobClass(object):
     connection_string = os.getenv("GNUPG_BLOB")
@@ -42,6 +42,8 @@ class GnuPGClass(object):
     recipients = []
     recipients.append(os.getenv("GNUPG_RECIPIENTS"))
     passphrase = os.getenv("GNUPG_PASSPHRASE")
+    keyfile = os.getenv("GNUPG_KEYFILE")
+    fingerprint = os.getenv('GNUPG_FINGERPRINT')
     # Encrypt the given file and save it as dstFile
     def encrypt_file(self, srcFile, dstFile):
         gpg = gnupg.GPG(gpgbinary='/usr/bin/gpg') 
@@ -87,12 +89,27 @@ class GnuPGClass(object):
         os.remove(localEncryptedFile)
         os.remove(localDecryptedFile)
 
+    def import_keys(self):
+        # download from Blob - to be replaced with KeyVault
+        bObj = BlobClass()
+        # Download to a temp file by appending .tmp to the srcBlob name
+        print("Downloading ", self.keyfile)
+        bObj.download_blob(self.keyfile,self.keyfile)
+        gpg = gnupg.GPG(gpgbinary='/usr/bin/gpg') 
+        key_data = open(self.keyfile).read()
+        import_result = gpg.import_keys(key_data)
+        gpg.trust_keys(self.fingerprint, 'TRUST_ULTIMATE')
+        pprint(import_result.results)
+        os.remove(self.keyfile)
 
 if __name__ == '__main__':
     gnuObj = GnuPGClass()
-    gnuObj.download_encrypt_and_upload_blob('blobstore.py','blobstore.encrypted.py')
+    gnuObj.import_keys()
+    print('Keys Imported')
+    gnuObj.download_encrypt_and_upload_blob(os.getenv('GNUPG_ORIGINAL_FILE'),os.getenv('GNUPG_ENCRYPTED_FILE'))
+    print('Download ',os.getenv('GNUPG_ORIGINAL_FILE'), ' and encrypt ', )
     print("Completed Download-Encrypt-Upload")
-    gnuObj.download_decrypt_and_upload_blob('blobstore.encrypted.py','blobstore.decrypted.py')
+    gnuObj.download_decrypt_and_upload_blob(os.getenv('GNUPG_ENCRYPTED_FILE'),os.getenv('GNUPG_DECRYPTED_FILE'))
 
 
 
